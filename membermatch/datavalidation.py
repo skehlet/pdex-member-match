@@ -2,7 +2,7 @@ from datetime import date
 from icecream import ic
 from .settings import FHIR_BASE_URL, CLIENT_ID, CLIENT_SECRET, TENANT, AUTH_URL, SECURE_URL
 from .settings import FHIR_STORE_SENSITIVITY
-from . import OperationOutcomeException, DEFAULT_CODE,DEFAULT_STATUS_CODE, DEFAULT_SEVERITY, DEFAULT_DESCRIPTION
+from .classes import OperationOutcomeException, DEFAULT_CODE,DEFAULT_STATUS_CODE, DEFAULT_SEVERITY, DEFAULT_DESCRIPTION
 from requests import request
 from .accesstoken import AccessToken
 import logging
@@ -100,26 +100,36 @@ def evaluate_consent(consent={}, member=""):
     :return accepted = True | False:
     """
     access_mode = ""
+    ic(member)
     access_period = {}
-    today = date.today()
-
-    if consent.has_key("policy"):
+    today = date.today().isoformat()
+    ic("Evaluating consent")
+    ic(consent)
+    ic(today)
+    if "policy" in consent.keys():
+        ic("checking consent policy")
         for i in consent['policy']:
-            if i.has_key("uri"):
+            ic(consent['policy'])
+            if "uri" in i.keys():
+                ic(i['uri'])
                 if i['uri'] in [REGULAR, SENSITIVE]:
                     access_mode = i["uri"]
-    if consent.has_key("provision"):
-        if consent['provision'].has_key("type"):
+    if "provision" in consent.keys():
+        ic("checking provision")
+        if "type" in consent['provision'].keys():
             if consent['provision']['type'] == "permit":
-                if consent['provision'].has_key("period"):
+                if "period" in consent['provision'].keys():
                     access_period = consent['provision']['period']
+    ic(access_period)
     start = ""
     end = ""
-    if not access_period.has_key("start"):
+    if "start" in access_period.keys():
         start = access_period['start']
-    if not access_period.has_key("end"):
+    if "end" in access_period.keys():
         end = access_period['end']
-
+    ic(access_period)
+    ic(start)
+    ic(end)
     if not valid_period(start, end):
         # write an error
         # operation outcome = 422
@@ -132,33 +142,49 @@ def evaluate_consent(consent={}, member=""):
 
     if FHIR_STORE_SENSITIVITY in ["EXCLUDED", "INCLUDED_LABELLED"]:
         accepted = True
+        ic(FHIR_STORE_SENSITIVITY)
     else:
         # FHIR_STORE_SENSITIVITY =  "INCLUDED_NOLABEL"
+        ic(FHIR_STORE_SENSITIVITY)
         accepted = False
         if access_mode == REGULAR:
             accepted = True
     if accepted:
         # Write the Consent record for the member_id
         # it will be needed when an access token is requested
-        # TODO Write FHIR Consent
+        ic("attempting to write consent")
         requesting_patient = ""
-        if consent.has_key("patient"):
+        if "patient" in consent.keys():
             requesting_patient = consent['patient']['reference']
+            ic(requesting_patient)
+            ic(member)
             consent['patient']['reference'] = member
-        if consent.has_key("performer"):
-            if consent['performer']['reference'] == requesting_patient:
-                consent['patient']['reference'] = member
-
+        if "performer" in consent.keys():
+            if consent['performer'][0]['reference'] == requesting_patient:
+                consent['performer'][0]['reference'] = member
+        if "sourceReference" in consent.keys():
+            if "reference" in consent['sourceReference'].keys():
+                consent['sourceReference']['display'] = consent['sourceReference']['reference']
+                del consent['sourceReference']["reference"]
+        ic("updated consent")
+        ic(consent)
+        print(consent)
+        data = {}
+        ic("calling write_fhir module")
         status_code, resp = write_fhir(calltype="POST", data=consent)
         if status_code in [200, 201, 204]:
             return accepted
+            ic(status_code)
         else:
+            ic("there was a problem")
             error = {'status_code': 422,
                      'code': DEFAULT_CODE, 'severity': DEFAULT_SEVERITY,
                      'description': "problem storing consent"}
 
             raise OperationOutcomeException(status_code=error['status_code'],
                                             description=error['description'])
+
+    return accepted
 
 
 def call_fhir(calltype="GET", query="", id=""):
@@ -193,6 +219,7 @@ def write_fhir(calltype="POST", data={}):
     :param data:
     :return status_code, resp:
     """
+    ic("writing FHIR resource")
     if SECURE_URL:
         access_token = TOKEN.get_token()
         headers ={"Accept": "application/json",
@@ -201,22 +228,26 @@ def write_fhir(calltype="POST", data={}):
     else:
         headers = {"Accept": "application/json",
                    "Content-Type": "application/json"}
-    if data.has_key("resourceType"):
+    ic(data)
+    if "resourceType" in data.keys():
         resource = data['resourceType']
         url = FHIR_BASE_URL + "/" + resource
+        ic(url)
     else:
+        ic("no resourceType")
         error = {'status_code': 406,
                  'code': DEFAULT_CODE, 'severity': DEFAULT_SEVERITY,
                  'description': "resourceType not specified"}
 
         raise OperationOutcomeException(status_code=error['status_code'],
                                         description=error['description'])
-
-    response = requests.post(url, data=data, headers=headers)
+    ic(data)
+    response = requests.post(url, json=data, headers=headers)
     try:
         resp = response.json()
     except ValueError:
         resp = {}
+    ic(resp)
     if response.status_code not in [200,201, 204]:
         logging.info(f"{response.status_code}:Problem with {calltype} call to FHIR Store")
         logging.info(response.content)
@@ -226,8 +257,10 @@ def write_fhir(calltype="POST", data={}):
 
 
 def valid_period(start="", end=""):
-
-    today = date.today()
+    ic(start)
+    ic(end)
+    today = date.today().isoformat()
+    ic(today)
     valid_start = False
     valid_end = False
     if start:

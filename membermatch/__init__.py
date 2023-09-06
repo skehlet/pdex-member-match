@@ -4,8 +4,8 @@ from flask import Flask, request, jsonify, Response
 from icecream import ic
 from .settings import DEFAULT_PORT
 from .settings import DEFAULT_DESCRIPTION, DEFAULT_SEVERITY, DEFAULT_CODE, DEFAULT_STATUS_CODE, REQUIRED_PARAMETERS
+from .classes import OperationOutcomeException
 from .datavalidation import unique_match_on_coverage, load_parameters, evaluate_consent
-from werkzeug.exceptions import HTTPException
 
 import json
 import uuid
@@ -15,29 +15,6 @@ debug_mode = True
 app = Flask(__name__)
 
 
-class OperationOutcomeException(HTTPException):
-    '''
-    handle errors with an Operation Outcome
-    '''
-
-    def __init__(self, status_code=None, code=None, severity=None, description=None):
-        if status_code is not None:
-            self.status_code = status_code
-        else:
-            self.status_code = DEFAULT_STATUS_CODE
-        if code is not None:
-            self.code = code
-        else:
-            self.code = DEFAULT_CODE
-        if severity is not None:
-            self.severity = severity
-        else:
-            self.severity = DEFAULT_SEVERITY
-        if description is not None:
-            self.description = description
-        else:
-            self.description = DEFAULT_DESCRIPTION
-        super().__init__()
 
 
 def validated_data(data={}):
