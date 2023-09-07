@@ -1,0 +1,11 @@
+[project]
+name = "membermatch"
+version = "0.1.0"
+description = "The PDex Member-Match operation handler for a single member"
+dependencies = [
+    "flask",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"

@@ -23,7 +23,11 @@ iniconfig==2.0.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.3
--e git+https://onyxhealth@dev.azure.com/onyxhealth/SAFHIR/_git/pdex-membermatch@3b0dda02523caff9f67b8b6cfff35a6a4da1c3ec#egg=membermatch
+-e git+https://github.com/onyxhealth/pdex-member-match.git#egg=membermatch
+#egg=membermatch
+#egg=membermatch
+
+# -e git+https://onyxhealth@dev.azure.com/onyxhealth/SAFHIR/_git/pdex-membermatch@3b0dda02523caff9f67b8b6cfff35a6a4da1c3ec#egg=membermatch
 packaging==23.1
 pluggy==1.2.0
 pydantic==1.10.12
