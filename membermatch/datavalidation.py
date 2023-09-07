@@ -257,8 +257,8 @@ def write_fhir(calltype="POST", data={}):
 
 
 def valid_period(start="", end=""):
-    ic(start)
-    ic(end)
+    # ic(start)
+    # ic(end)
     today = date.today().isoformat()
     ic(today)
     valid_start = False
