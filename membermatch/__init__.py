@@ -5,16 +5,13 @@ from icecream import ic
 from .settings import DEFAULT_PORT
 from .settings import DEFAULT_DESCRIPTION, DEFAULT_SEVERITY, DEFAULT_CODE, DEFAULT_STATUS_CODE, REQUIRED_PARAMETERS
 from .classes import OperationOutcomeException
-from .datavalidation import unique_match_on_coverage, load_parameters, evaluate_consent
+from .datavalidation import unique_match_on_coverage, load_parameters, evaluate_consent, get_metadata
 
 import json
 import uuid
 
 debug_mode = True
-
 app = Flask(__name__)
-
-
 
 
 def validated_data(data={}):
@@ -132,6 +129,17 @@ def hello_world():
     '''
     return 'Hello, World!'
 
+
+@app.route('/metadata')
+def metadata():
+    '''
+    Test the HAPI Server access
+    :return:
+    '''
+
+    status_code, response = get_metadata()
+
+    return "hello! I'm HAPI"
 
 @app.route('/$member-match', methods=['POST'])
 def member_match():

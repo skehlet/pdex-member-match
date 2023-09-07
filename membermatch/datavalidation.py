@@ -281,3 +281,34 @@ def valid_period(start="", end=""):
         valid = False
     ic(valid)
     return valid
+
+
+def get_metadata():
+    '''
+    Check the HAPI Server
+    :return:
+    '''
+
+    if SECURE_URL:
+        access_token = TOKEN.get_token()
+        headers ={"Accept": "application/json",
+                  "Authorization": "Bearer %s" %access_token,
+                  "Content-Type": "application/json"}
+    else:
+        headers = {"Accept": "application/json",
+                   "Content-Type": "application/json"}
+    url = FHIR_BASE_URL + "/" + " metadata"
+    ic(url)
+
+    response = requests.get(url, headers=headers)
+    try:
+        resp = response.json()
+    except ValueError:
+        resp = {}
+    ic(resp)
+    if response.status_code not in [200,201, 204]:
+        logging.info(f"{response.status_code}:Problem with {calltype} call to FHIR Store")
+        logging.info(response.content)
+    logging.debug(resp)
+
+    return response.status_code, resp

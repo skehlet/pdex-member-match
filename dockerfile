@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.11  # as intermediate
+FROM python:3.11
+# as intermediate
 
 #RUN apk add git openssh
 #ARG SSH_PRIVATE_KEY
@@ -19,13 +20,18 @@ WORKDIR /code
 
 COPY requirements.txt .
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
 
 EXPOSE 8000
-
 ARG FLASK_APP=membermatch/__init__.py
+ARG FLASK_RUN_PORT=8000
+ARG FLASK_DEBUG=1
+
 
 # ENTRYPOINT ["gunicorn", "main:app"]
-ENTRYPOINT ["gunicorn", "membermatch/__init__.py:app"]
+# ENTRYPOINT ["gunicorn", "membermatch/__init__.py:app"]
+# ENTRYPOINT ["./entrypoint.sh"]
+# ENTRYPOINT ["gunicorn", "membermatch:"]
+CMD ["flask", "-A", "membermatch/__init__.py", "--debug", "run", "--host", "0.0.0.0", "--port", "8000"]
