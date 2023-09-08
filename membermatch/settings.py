@@ -8,7 +8,7 @@ DEFAULT_CODE = "processing"
 REQUIRED_PARAMETERS = ["MemberPatient", "CoverageToMatch", "Consent"]
 DEFAULT_PORT = 8000
 # FHIR_BASE_URL = "http://localhost:8080/fhir"
-FHIR_BASE_URL = "http://0.0.0.0:8080/fhir"
+FHIR_BASE_URL = "http://172.17.0.2:8080/fhir"
 FHIR_BASE_URI = FHIR_BASE_URL
 
 SECURE_URL = False   # True
