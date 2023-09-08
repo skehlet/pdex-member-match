@@ -297,8 +297,8 @@ def get_metadata():
     else:
         headers = {"Accept": "application/json",
                    "Content-Type": "application/json"}
-    # url = FHIR_BASE_URL + "/metadata"
-    url = "http://0.0.0.0:8080/fhir" + "/metadata"
+    url = FHIR_BASE_URL + "/metadata"
+    # url = "http://0.0.0.0:8080/fhir" + "/metadata"
     ic(url)
 
     response = requests.get(url, headers=headers)
