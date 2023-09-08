@@ -138,7 +138,8 @@ def metadata():
     '''
 
     status_code, response = get_metadata()
-
+    ic(status_code)
+    ic(response)
     return "hello! I'm HAPI"
 
 @app.route('/$member-match', methods=['POST'])
