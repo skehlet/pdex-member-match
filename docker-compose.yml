@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  fhirstore:
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "8080:8080"
+    volumes:
+      - hapi-data:/data/hapi
+    networks:
+      - mm-overlay
+  flask:
+    image: "pdex-membermatch:latest"
+    ports:
+    - "8000:8000"
+    environment:
+      - FLASK_APP=membermatch/__init__.py
+      - FLASK_RUN_PORT=8000
+      - FLASK_DEBUG=1
+      - FHIR_STORE_SERVER=fhirstore
+    networks:
+      - mm-overlay
+    depends_on:
+      - fhirstore
+volumes:
+  hapi-data:
+    external: false
+
+networks:
+  mm-overlay:
