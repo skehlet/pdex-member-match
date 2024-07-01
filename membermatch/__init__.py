@@ -2,8 +2,16 @@ import os
 
 from flask import Flask, request, jsonify, Response
 from icecream import ic
-from .settings import DEFAULT_PORT
-from .settings import DEFAULT_DESCRIPTION, DEFAULT_SEVERITY, DEFAULT_CODE, DEFAULT_STATUS_CODE, REQUIRED_PARAMETERS
+import requests
+from .settings import (
+    DEFAULT_PORT,
+    DEFAULT_DESCRIPTION,
+    DEFAULT_SEVERITY,
+    DEFAULT_CODE,
+    DEFAULT_STATUS_CODE,
+    REQUIRED_PARAMETERS,
+    DEFAULT_FHIR_STORE_PORT
+)
 from .classes import OperationOutcomeException
 from .datavalidation import unique_match_on_coverage, load_parameters, evaluate_consent, get_metadata
 
@@ -139,7 +147,7 @@ def metadata():
 
     status_code, response = get_metadata()
     ic(status_code)
-    ic(response)
+    # ic(response)
     # return "hello! I'm HAPI"
     return jsonify(response)
 
@@ -165,13 +173,36 @@ def member_match():
     ic(m_data[1])
     m_data1 = m_data[1]
     member_id = ""
-    if 'entry' in m_data1:
-        if len(m_data1['entry']) == 1:
-            member_id = m_data1['entry'][0]['resource']['beneficiary']['reference']
-            ic(member_id)
-            # We have a unique member. Now check Consent
-            comply = evaluate_consent(consent, member_id)
-            return jsonify({'member_id': member_id})
+    if 'entry' not in m_data1:
+        raise OperationOutcomeException(status_code=422,
+                                        description="No match")
+
+    if len(m_data1['entry']) == 1:
+        member_id = m_data1['entry'][0]['resource']['beneficiary']['reference']
+        ic(member_id)
+        # We have a unique member. Now check Consent
+        comply = evaluate_consent(consent, member_id)
+        return jsonify({'member_id': member_id})
+
+
+# Reverse proxy everything else to the HAPI FHIR server
+# Taken from: https://github.com/0xe2d0/Flask-Reverse-Proxy/blob/main/proxy.py
+@app.route("/<path:path>",methods=["GET","POST"])
+def proxy(path):
+    # global SITE_NAME
+    SITE_NAME = f"http://localhost:{DEFAULT_FHIR_STORE_PORT}/"
+    if request.method=="GET":
+        resp = requests.get(f"{SITE_NAME}{path}")
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+        headers = [(name, value) for (name, value) in  resp.raw.headers.items() if name.lower() not in excluded_headers]
+        response = Response(resp.content, resp.status_code, headers)
+        return response
+    elif request.method=="POST":
+        resp = requests.post(f"{SITE_NAME}{path}",data=request.form)
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+        headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
+        response = Response(resp.content, resp.status_code, headers)
+        return response
 
 
 if __name__ == '__main__':

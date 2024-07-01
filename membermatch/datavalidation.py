@@ -306,10 +306,10 @@ def get_metadata():
         resp = response.json()
     except ValueError:
         resp = {}
-    ic(resp)
+    # ic(resp)
     if response.status_code not in [200,201, 204]:
         logging.info(f"{response.status_code}:Problem with {calltype} call to FHIR Store")
         logging.info(response.content)
-    logging.debug(resp)
+    # logging.debug(resp)
 
     return response.status_code, resp

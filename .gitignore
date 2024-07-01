@@ -12,3 +12,5 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+membermatch_info.log
