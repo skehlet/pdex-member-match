@@ -1,32 +1,32 @@
 {
-        "resourceType": "Patient",
-        "identifier": [
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "type": {
+        "coding": [
           {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                  "code": "MB"
-                }
-              ]
-            },
-            "system": "http://example.org/old-payer/identifiers/member",
-            "value": "55678",
-            "assigner": {
-              "display": "Old Payer"
-            }
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
           }
-        ],
-        "name": [
-          {
-            "use": "official",
-            "family": "Person",
-            "given": [
-              "Patrick",
-              "A"
-            ]
-          }
-        ],
-        "gender": "male",
-        "birthDate": "1975-12-25"
+        ]
+      },
+      "system": "http://example.org/old-payer/identifiers/member",
+      "value": "55678",
+      "assigner": {
+        "display": "Old Payer"
       }
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Person",
+      "given": [
+        "Patrick",
+        "A"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1975-12-25"
+}
